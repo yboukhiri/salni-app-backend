@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: database
+    volumes:
+      - "~/docker-volume-mount/mariadb_data:/var/lib/mysql"
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - "8080:80"
+volumes:
+  mariadb_data:
