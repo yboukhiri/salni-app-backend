@@ -23,8 +23,8 @@ export class FriendshipService {
     const friendRequest = new FriendRequest();
     friendRequest.senderId = senderId;
     friendRequest.receiverId = receiverId;
-    friendRequest.sender = await this.usersService.getUser(senderId);
-    friendRequest.receiver = await this.usersService.getUser(receiverId);
+    friendRequest.sender = await this.usersService.getUserById(senderId);
+    friendRequest.receiver = await this.usersService.getUserById(receiverId);
     return FriendRequest.save(friendRequest);
   }
 
@@ -43,8 +43,8 @@ export class FriendshipService {
       FriendRequest.delete(friendRequest.id);
       throw new Error('Users are blocked');
     }
-    const sender = await this.usersService.getUser(senderId);
-    const receiver = await this.usersService.getUser(receiverId);
+    const sender = await this.usersService.getUserById(senderId);
+    const receiver = await this.usersService.getUserById(receiverId);
     sender.friends.push(receiver);
     receiver.friends.push(sender);
     await User.save(sender);
@@ -66,8 +66,8 @@ export class FriendshipService {
     if (!(await this.areFriends(userId, friendId))) {
       throw new Error('Users are not friends');
     }
-    const user = await this.usersService.getUser(userId);
-    const friend = await this.usersService.getUser(friendId);
+    const user = await this.usersService.getUserById(userId);
+    const friend = await this.usersService.getUserById(friendId);
     user.friends = user.friends.filter((friend) => friend.id !== friendId);
     friend.friends = friend.friends.filter((friend) => friend.id !== userId);
     await User.save(user);
@@ -78,15 +78,15 @@ export class FriendshipService {
     if (await this.areBlocked(userId, blockedUserId)) {
       throw new Error('Users are already blocked');
     }
-    const user = await this.usersService.getUser(userId);
-    const blockedUser = await this.usersService.getUser(blockedUserId);
+    const user = await this.usersService.getUserById(userId);
+    const blockedUser = await this.usersService.getUserById(blockedUserId);
     user.blockedUsers.push(blockedUser);
     await User.save(user);
   }
 
   async areFriends(userId: number, friendId: number) {
-    const user = await this.usersService.getUser(userId);
-    const friend = await this.usersService.getUser(friendId);
+    const user = await this.usersService.getUserById(userId);
+    const friend = await this.usersService.getUserById(friendId);
     if (!user || !friend) {
       throw new Error('One of the users does not exist');
     }
@@ -94,8 +94,8 @@ export class FriendshipService {
   }
 
   async areBlocked(userId1: number, userId2: number) {
-    const user1 = await this.usersService.getUser(userId1);
-    const user2 = await this.usersService.getUser(userId2);
+    const user1 = await this.usersService.getUserById(userId1);
+    const user2 = await this.usersService.getUserById(userId2);
     return (
       user1.blockedUsers.map((user) => user.id).includes(user2.id) ||
       user2.blockedUsers.map((user) => user.id).includes(user1.id)
@@ -103,8 +103,8 @@ export class FriendshipService {
   }
 
   async friendRequestExists(senderId: number, receiverId: number) {
-    const sender = await this.usersService.getUser(senderId);
-    const receiver = await this.usersService.getUser(receiverId);
+    const sender = await this.usersService.getUserById(senderId);
+    const receiver = await this.usersService.getUserById(receiverId);
     return (
       sender.sentFriendRequests
         .map((request) => request.receiver.id)

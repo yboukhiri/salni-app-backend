@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var User_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
+const class_validator_1 = require("class-validator");
 const typeorm_1 = require("typeorm");
 const friend_request_entity_1 = require("./friend-request.entity");
 let User = User_1 = class User extends typeorm_1.BaseEntity {
@@ -34,17 +35,28 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(2, 255),
     __metadata("design:type", String)
 ], User.prototype, "firstName", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: false }),
+    (0, class_validator_1.Length)(1, 255),
     __metadata("design:type", String)
 ], User.prototype, "lastName", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: false }),
+    (0, typeorm_1.Unique)(['email']),
+    (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(8, 255),
+    __metadata("design:type", String)
+], User.prototype, "password", void 0);
 __decorate([
     (0, typeorm_1.ManyToMany)(() => User_1, (user) => user.friends),
     (0, typeorm_1.JoinTable)(),

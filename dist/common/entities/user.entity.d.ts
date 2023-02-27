@@ -5,6 +5,7 @@ export declare class User extends BaseEntity {
     firstName: string;
     lastName: string;
     email: string;
+    password: string;
     friends: User[];
     blockedUsers: User[];
     sentFriendRequests: FriendRequest[];

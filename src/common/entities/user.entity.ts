@@ -1,3 +1,4 @@
+import { IsEmail, IsString, Length } from 'class-validator';
 import {
   Entity,
   Column,
@@ -7,6 +8,7 @@ import {
   AfterLoad,
   JoinTable,
   OneToMany,
+  Unique,
 } from 'typeorm';
 import { FriendRequest } from './friend-request.entity';
 
@@ -15,14 +17,24 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: false })
+  @IsString()
+  @Length(2, 255)
   firstName: string;
 
-  @Column()
+  @Column({ nullable: false })
+  @Length(1, 255)
   lastName: string;
 
-  @Column()
+  @Column({ nullable: false })
+  @Unique(['email'])
+  @IsEmail()
   email: string;
+
+  @Column({ nullable: false })
+  @IsString()
+  @Length(8, 255)
+  password: string;
 
   @ManyToMany(() => User, (user) => user.friends)
   @JoinTable()

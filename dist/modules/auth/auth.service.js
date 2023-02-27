@@ -5,43 +5,49 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const serviceAccount = require("./serviceAccountKey.json");
-const auth_1 = require("firebase/auth");
-const app_1 = require("firebase/app");
+const users_service_1 = require("../users/users.service");
+const bcrypt = require("bcrypt");
+const jwt_1 = require("@nestjs/jwt");
 let AuthService = class AuthService {
-    async onModuleInit() {
-        const firebaseConfig = serviceAccount;
-        this.app = (0, app_1.initializeApp)(firebaseConfig);
-        console.log('Firebase initialized');
+    constructor(usersService, jwtService) {
+        this.usersService = usersService;
+        this.jwtService = jwtService;
     }
-    async signInWithEmailAndPassword(email, password) {
-        console.log('signInWithEmailAndPassword');
-        console.log('email', email);
-        console.log('password', password);
-        if (!this.auth) {
-            throw new Error('Firebase auth not initialized.');
+    async validateUser(userCredentials) {
+        const user = await this.usersService.getUserByEmail(userCredentials.email);
+        if (!user) {
+            return null;
         }
-        else {
-            console.log('Firebase auth initialized.');
+        const passwordValid = await bcrypt.compare(userCredentials.password, user.password);
+        if (!user) {
+            throw new Error('User does not exist');
         }
-        console.log('start auth 2');
-        const auth2 = (0, auth_1.getAuth)();
-        console.log('auth2', auth2);
-        if (!(0, auth_1.getAuth)()) {
-            throw new Error('XXX Firebase auth not initialized. XXX');
+        if (user && passwordValid) {
+            return user;
         }
-        else {
-            console.log('Firebase auth initialized 22222222222');
-        }
-        const userCredentials = await (0, auth_1.signInWithEmailAndPassword)(this.auth, email, password);
-        return userCredentials;
+        return null;
+    }
+    async login(user) {
+        const payload = { email: user.email, id: user.id };
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
+    }
+    async getCurrentUser(req) {
+        const user = await this.usersService.getUserById(req.user.userId);
+        return user;
     }
 };
 AuthService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        jwt_1.JwtService])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth.service.js.map

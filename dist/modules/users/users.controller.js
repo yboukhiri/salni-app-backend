@@ -28,7 +28,7 @@ let UsersController = class UsersController {
         return this.usersService.addRandomUser();
     }
     getUser(id) {
-        return this.usersService.getUser(id);
+        return this.usersService.getUserById(id);
     }
     sendFriendRequest(senderId, receiverId) {
         return this.friendshipService.sendFriendRequest(senderId, receiverId);

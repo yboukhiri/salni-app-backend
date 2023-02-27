@@ -15,7 +15,7 @@ let UsersService = class UsersService {
             relations: ['friends', 'blockedUsers'],
         });
     }
-    async getUser(id) {
+    async getUserById(id) {
         const user = await user_entity_1.User.findOne({
             where: { id },
             relations: [
@@ -29,6 +29,25 @@ let UsersService = class UsersService {
             throw new Error('User does not exist');
         }
         return user;
+    }
+    getUserByEmail(username) {
+        return user_entity_1.User.findOne({
+            where: { email: username },
+            relations: [
+                'friends',
+                'blockedUsers',
+                'sentFriendRequests',
+                'receivedFriendRequests',
+            ],
+        });
+    }
+    async createUser(email, password, firstName, lastName) {
+        const user = new user_entity_1.User();
+        user.email = email;
+        user.password = password;
+        user.firstName = firstName;
+        user.lastName = lastName;
+        return await user_entity_1.User.save(user);
     }
     async addRandomUser() {
         const user = new user_entity_1.User();

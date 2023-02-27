@@ -9,7 +9,7 @@ export class UsersService {
     });
   }
 
-  async getUser(id: number) {
+  async getUserById(id: number) {
     const user = await User.findOne({
       where: { id },
       relations: [
@@ -23,6 +23,32 @@ export class UsersService {
       throw new Error('User does not exist');
     }
     return user;
+  }
+
+  getUserByEmail(username: string) {
+    return User.findOne({
+      where: { email: username },
+      relations: [
+        'friends',
+        'blockedUsers',
+        'sentFriendRequests',
+        'receivedFriendRequests',
+      ],
+    });
+  }
+
+  async createUser(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ) {
+    const user = new User();
+    user.email = email;
+    user.password = password;
+    user.firstName = firstName;
+    user.lastName = lastName;
+    return await User.save(user);
   }
 
   async addRandomUser() {
