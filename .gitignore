@@ -1,0 +1,19 @@
+# Environment variables
+.env
+
+# IDE 
+.vscode
+
+# Logs
+logs
+*.log
+
+# Dependency directories
+node_modules
+
+# Build files
+dist
+
+# Docker
+docker 
+Dockerfile

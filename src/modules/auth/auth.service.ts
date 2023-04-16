@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import * as bcrypt from "bcrypt";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async validateUser(userCredentials: { email: string; password: string }) {
@@ -17,10 +17,10 @@ export class AuthService {
     }
     const passwordValid = await bcrypt.compare(
       userCredentials.password,
-      user.password,
+      user.password
     );
     if (!user) {
-      throw new Error('User does not exist');
+      throw new Error("User does not exist");
     }
     if (user && passwordValid) {
       return user;
@@ -36,7 +36,10 @@ export class AuthService {
   }
 
   async getCurrentUser(req) {
-    const user = await this.usersService.getUserById(req.user.userId);
+    // get current user from bearer token
+    const token = req.headers.authorization.split(" ")[1];
+    const payload = this.jwtService.verify(token);
+    const user = await this.usersService.getUserById(payload.id);
     return user;
   }
 }

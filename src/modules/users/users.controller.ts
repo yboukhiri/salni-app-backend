@@ -1,12 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { FriendshipService } from './friendship.service';
-import { UsersService } from './users.service';
+import { Controller, Get, Param, Request } from "@nestjs/common";
+import { FriendshipService } from "./friendship.service";
+import { UsersService } from "./users.service";
 
-@Controller('users')
+@Controller("api/users")
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private friendshipService: FriendshipService,
+    private friendshipService: FriendshipService
   ) {}
 
   @Get()
@@ -14,44 +14,49 @@ export class UsersController {
     return this.usersService.getUsers();
   }
 
-  @Get('add')
+  @Get("add")
   addRandomUser() {
     return this.usersService.addRandomUser();
   }
 
-  @Get(':id')
-  getUser(@Param('id') id: number) {
-    return this.usersService.getUserById(id);
+  // @Get(":id")
+  // getUser(@Param("id") id: number) {
+  //   return this.usersService.getUserById(id);
+  // }
+
+  @Get("friends")
+  getFriends(@Request() req) {
+    return this.friendshipService.getFriends(req);
   }
 
-  @Get(':senderId/send-friend-request/:receiverId')
+  @Get(":senderId/send-friend-request/:receiverId")
   sendFriendRequest(
-    @Param('senderId') senderId: number,
-    @Param('receiverId') receiverId: number,
+    @Param("senderId") senderId: number,
+    @Param("receiverId") receiverId: number
   ) {
     return this.friendshipService.sendFriendRequest(senderId, receiverId);
   }
 
-  @Get(':receiverId/accept-friend-request/:senderId')
+  @Get(":receiverId/accept-friend-request/:senderId")
   acceptFriendRequest(
-    @Param('senderId') senderId: number,
-    @Param('receiverId') receiverId: number,
+    @Param("senderId") senderId: number,
+    @Param("receiverId") receiverId: number
   ) {
     return this.friendshipService.acceptFriendRequest(senderId, receiverId);
   }
 
-  @Get(':senderId/cancel-friend-request/:receiverId')
+  @Get(":senderId/cancel-friend-request/:receiverId")
   cancelFriendRequest(
-    @Param('senderId') senderId: number,
-    @Param('receiverId') receiverId: number,
+    @Param("senderId") senderId: number,
+    @Param("receiverId") receiverId: number
   ) {
     return this.friendshipService.cancelFriendRequest(senderId, receiverId);
   }
 
-  @Get(':senderId/unfriend/:receiverId')
+  @Get(":senderId/unfriend/:receiverId")
   unfriend(
-    @Param('senderId') senderId: number,
-    @Param('receiverId') receiverId: number,
+    @Param("senderId") senderId: number,
+    @Param("receiverId") receiverId: number
   ) {
     return this.friendshipService.unfriend(senderId, receiverId);
   }

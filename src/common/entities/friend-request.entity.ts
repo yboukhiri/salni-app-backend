@@ -5,8 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   BaseEntity,
-} from 'typeorm';
-import { User } from './user.entity';
+} from "typeorm";
+import { User } from "./user.entity";
 
 @Entity()
 export class FriendRequest extends BaseEntity {
@@ -20,11 +20,11 @@ export class FriendRequest extends BaseEntity {
   receiverId: number;
 
   @ManyToOne(() => User, { eager: true })
-  @JoinColumn({ name: 'senderId' })
+  @JoinColumn({ name: "senderId" })
   sender: User;
 
   @ManyToOne(() => User, { eager: true })
-  @JoinColumn({ name: 'receiverId' })
+  @JoinColumn({ name: "receiverId" })
   receiver: User;
 
   @Column({ default: false })
@@ -33,6 +33,6 @@ export class FriendRequest extends BaseEntity {
   @Column({ default: false })
   cancelled: boolean;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 }

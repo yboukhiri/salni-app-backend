@@ -6,48 +6,43 @@ import {
   UseGuards,
   Get,
   UnauthorizedException,
-} from '@nestjs/common';
-import { User } from 'src/common/entities/user.entity';
-import { UsersService } from '../users/users.service';
-import { AuthService } from './auth.service';
-import * as bcrypt from 'bcrypt';
-import { AuthGuard } from '@nestjs/passport';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { Public } from './public.auth';
+} from "@nestjs/common";
+import { User } from "src/common/entities/user.entity";
+import { UsersService } from "../users/users.service";
+import { AuthService } from "./auth.service";
+import * as bcrypt from "bcrypt";
+import { AuthGuard } from "@nestjs/passport";
+import { JwtAuthGuard } from "./jwt-auth.guard";
+import { Public } from "./public.auth";
+import { CreateUserDto } from "./dto/create-user.dto";
 
-@Controller('auth')
+@Controller("api/auth")
 export class AuthController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly authService: AuthService,
+    private readonly authService: AuthService
   ) {}
 
   @Public()
-  @Post('signup')
-  async createUser(
-    @Body('email') email: string,
-    @Body('password') password: string,
-    @Body('firstName') firstName: string,
-    @Body('lastName') lastName: string,
-  ): Promise<User> {
+  @Post("signup")
+  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
     const saltOrRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltOrRounds);
-    const result = await this.usersService.createUser(
-      email,
-      hashedPassword,
-      firstName,
-      lastName,
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltOrRounds
     );
+    createUserDto.password = hashedPassword;
+    const result = await this.usersService.createUser(createUserDto);
     return result;
   }
 
   @Public()
-  @Post('login')
+  @Post("login")
   async login(@Request() req) {
     const userCredentials = req.body;
     const user = await this.authService.validateUser(userCredentials);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new Error("Invalid credentials");
     }
     return this.authService.login(user);
   }
