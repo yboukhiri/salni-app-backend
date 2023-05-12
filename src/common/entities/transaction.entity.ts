@@ -8,6 +8,7 @@ import {
   ManyToOne,
 } from "typeorm";
 import { Deal } from "./deal.entity";
+import { Currency } from "../enums/currency.enum";
 
 @Entity()
 export class Transaction extends BaseEntity {
@@ -26,6 +27,9 @@ export class Transaction extends BaseEntity {
   @Column()
   amount: number;
 
+  @Column({ type: "enum", enum: Currency, nullable: false })
+  currency: Currency;
+
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
@@ -33,11 +37,11 @@ export class Transaction extends BaseEntity {
   accepted: boolean;
 
   @Column({ default: false })
-  cancelled: boolean;
+  rejected: boolean;
 
   @Column({ type: "timestamp", nullable: true })
   acceptedAt: Date;
 
   @Column({ type: "timestamp", nullable: true })
-  cancelledAt: Date;
+  rejectedAt: Date;
 }

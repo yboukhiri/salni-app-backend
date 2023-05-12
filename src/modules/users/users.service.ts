@@ -1,14 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { User } from "src/common/entities/user.entity";
+import { User } from "../../common/entities/user.entity";
 import { CreateUserDto } from "../auth/dto/create-user.dto";
+import { userToDto } from "src/common/mappers/user-to-dto";
+import { AuthService } from "../auth/auth.service";
+import { FriendshipService } from "./friendship.service";
 
 @Injectable()
 export class UsersService {
-  async getUsers() {
-    return await User.find({
-      relations: ["friends", "blockedUsers"],
-    });
-  }
+  constructor() {}
 
   async getUserById(id: number) {
     const user = await User.findOne({
@@ -18,6 +17,7 @@ export class UsersService {
         "blockedUsers",
         "sentFriendRequests",
         "receivedFriendRequests",
+        "deals",
       ],
     });
     if (!user) {
@@ -51,11 +51,8 @@ export class UsersService {
     return await User.save(user);
   }
 
-  async addRandomUser() {
-    const user = new User();
-    user.firstName = "John" + Math.random();
-    user.lastName = "Doe" + Math.random();
-    user.email = "john.doe" + Math.random() + "@gmail.com";
-    return User.save(user);
+  async deleteUser(id: number) {
+    const user = await this.getUserById(id);
+    return await User.remove(user);
   }
 }

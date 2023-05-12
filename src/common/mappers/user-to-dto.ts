@@ -1,9 +1,17 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../entities/user.entity";
 
-export interface UserDto {
+export class UserDto {
+  @ApiProperty({ example: 1 })
   id: number;
+
+  @ApiProperty({ example: "John" })
   firstName: string;
+
+  @ApiProperty({ example: "Doe" })
   lastName: string;
+
+  @ApiProperty({ example: "john.doe@example.com" })
   email: string;
 }
 

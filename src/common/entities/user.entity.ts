@@ -9,6 +9,7 @@ import {
   JoinTable,
   OneToMany,
   Unique,
+  BeforeRemove,
 } from "typeorm";
 import { Deal } from "./deal.entity";
 import { FriendRequest } from "./friend-request.entity";
@@ -58,7 +59,9 @@ export class User extends BaseEntity {
   @JoinTable()
   blockedUsers: User[];
 
-  @OneToMany(() => FriendRequest, (friendRequest) => friendRequest.sender)
+  @OneToMany(() => FriendRequest, (friendRequest) => friendRequest.sender, {
+    cascade: true,
+  })
   sentFriendRequests: FriendRequest[];
 
   @OneToMany(() => FriendRequest, (friendRequest) => friendRequest.receiver)
@@ -82,5 +85,25 @@ export class User extends BaseEntity {
     if (!this.receivedFriendRequests) {
       this.receivedFriendRequests = [];
     }
+  }
+
+  @BeforeRemove()
+  async removeRelations() {
+    const promises = [];
+    this.friends.forEach(async (friend) => {
+      friend.friends = friend.friends.filter((f) => f.id !== this.id);
+      promises.push(friend.save());
+    });
+    this.blockedUsers.forEach(async (blockedUser) => {
+      blockedUser.blockedUsers = blockedUser.blockedUsers.filter(
+        (bu) => bu.id !== this.id
+      );
+      promises.push(blockedUser.save());
+    });
+    this.receivedFriendRequests.forEach(async (receivedFriendRequest) => {
+      receivedFriendRequest.receiver = null;
+      promises.push(receivedFriendRequest.save());
+    });
+    await Promise.all(promises);
   }
 }

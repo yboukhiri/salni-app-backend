@@ -6,16 +6,20 @@ import {
   UseGuards,
   Get,
   UnauthorizedException,
+  Delete,
+  HttpCode,
 } from "@nestjs/common";
 import { User } from "src/common/entities/user.entity";
 import { UsersService } from "../users/users.service";
 import { AuthService } from "./auth.service";
 import * as bcrypt from "bcrypt";
-import { AuthGuard } from "@nestjs/passport";
-import { JwtAuthGuard } from "./jwt-auth.guard";
 import { Public } from "./public.auth";
 import { CreateUserDto } from "./dto/create-user.dto";
+import { ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { LoginDto } from "./dto/login-dto";
+import { UserDto } from "src/common/mappers/user-to-dto";
 
+@ApiTags("Auth")
 @Controller("api/auth")
 export class AuthController {
   constructor(
@@ -38,9 +42,9 @@ export class AuthController {
 
   @Public()
   @Post("login")
-  async login(@Request() req) {
-    const userCredentials = req.body;
-    const user = await this.authService.validateUser(userCredentials);
+  @ApiBody({ type: LoginDto })
+  async login(@Body() loginDto: LoginDto) {
+    const user = await this.authService.validateUser(loginDto);
     if (!user) {
       throw new Error("Invalid credentials");
     }
@@ -48,7 +52,15 @@ export class AuthController {
   }
 
   @Get()
-  getCurrentUser(@Request() req) {
-    return this.authService.getCurrentUser(req);
+  @ApiResponse({ type: UserDto })
+  async getCurrentUser(@Request() req): Promise<UserDto> {
+    return await this.authService.getCurrentUserDto(req);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async deleteUser(@Request() req) {
+    const user = await this.authService.getCurrentUser(req);
+    await this.usersService.deleteUser(user.id);
   }
 }

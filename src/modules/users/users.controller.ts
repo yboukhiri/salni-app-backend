@@ -1,7 +1,21 @@
-import { Controller, Get, Param, Request } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Request,
+} from "@nestjs/common";
 import { FriendshipService } from "./friendship.service";
 import { UsersService } from "./users.service";
+import { AuthService } from "../auth/auth.service";
+import { ApiResponse, ApiTags } from "@nestjs/swagger";
+import { UserDto } from "src/common/mappers/user-to-dto";
+import { FriendRequest } from "src/common/entities/friend-request.entity";
+import { FriendRequestDto } from "src/common/mappers/friend-request-to-dto";
 
+@ApiTags("Users")
 @Controller("api/users")
 export class UsersController {
   constructor(
@@ -10,54 +24,72 @@ export class UsersController {
   ) {}
 
   @Get()
-  getUsers() {
-    return this.usersService.getUsers();
+  @ApiResponse({ type: UserDto, isArray: true })
+  async getUsers(@Request() req): Promise<UserDto[]> {
+    return await this.friendshipService.getUsers(req);
   }
-
-  @Get("add")
-  addRandomUser() {
-    return this.usersService.addRandomUser();
-  }
-
-  // @Get(":id")
-  // getUser(@Param("id") id: number) {
-  //   return this.usersService.getUserById(id);
-  // }
 
   @Get("friends")
-  getFriends(@Request() req) {
-    return this.friendshipService.getFriends(req);
+  @ApiResponse({ type: UserDto, isArray: true })
+  async getFriends(@Request() req): Promise<UserDto[]> {
+    return await this.friendshipService.getFriends(req);
   }
 
-  @Get(":senderId/send-friend-request/:receiverId")
-  sendFriendRequest(
-    @Param("senderId") senderId: number,
-    @Param("receiverId") receiverId: number
-  ) {
-    return this.friendshipService.sendFriendRequest(senderId, receiverId);
+  @Get("blocked-users")
+  @ApiResponse({ type: UserDto, isArray: true })
+  async getBlockedUsers(@Request() req): Promise<UserDto[]> {
+    return await this.friendshipService.getBlockedUsers(req);
   }
 
-  @Get(":receiverId/accept-friend-request/:senderId")
-  acceptFriendRequest(
-    @Param("senderId") senderId: number,
-    @Param("receiverId") receiverId: number
-  ) {
-    return this.friendshipService.acceptFriendRequest(senderId, receiverId);
+  @Get("received-friend-requests")
+  @ApiResponse({ type: FriendRequestDto, isArray: true })
+  async getReceivedFriendRequests(@Request() req): Promise<FriendRequestDto[]> {
+    return await this.friendshipService.getReceivedFriendRequests(req);
   }
 
-  @Get(":senderId/cancel-friend-request/:receiverId")
-  cancelFriendRequest(
-    @Param("senderId") senderId: number,
-    @Param("receiverId") receiverId: number
-  ) {
-    return this.friendshipService.cancelFriendRequest(senderId, receiverId);
+  @Get("sent-friend-requests")
+  @ApiResponse({ type: FriendRequestDto, isArray: true })
+  async getSentFriendRequests(@Request() req): Promise<FriendRequestDto[]> {
+    return await this.friendshipService.getSentFriendRequests(req);
   }
 
-  @Get(":senderId/unfriend/:receiverId")
-  unfriend(
-    @Param("senderId") senderId: number,
+  @Post("friend-request/:receiverId")
+  @HttpCode(201)
+  @ApiResponse({ type: FriendRequestDto })
+  async sendFriendRequest(
+    @Request() req,
     @Param("receiverId") receiverId: number
+  ): Promise<FriendRequestDto> {
+    return await this.friendshipService.sendFriendRequest(req, receiverId);
+  }
+
+  @Post("accept-friend-request/:requestId")
+  @HttpCode(201)
+  async acceptFriendRequest(
+    @Param("requestId") requestId: number,
+    @Request() req
   ) {
-    return this.friendshipService.unfriend(senderId, receiverId);
+    return await this.friendshipService.acceptFriendRequest(requestId, req);
+  }
+
+  @Delete("cancel-friend-request/:requestId")
+  @HttpCode(204)
+  async cancelFriendRequest(
+    @Param("requestId") requestId: number,
+    @Request() req
+  ) {
+    return await this.friendshipService.cancelFriendRequest(requestId, req);
+  }
+
+  @Delete("unfriend/:friendId")
+  @HttpCode(204)
+  async unfriend(@Param("friendId") friendId: number, @Request() req) {
+    return await this.friendshipService.unfriend(friendId, req);
+  }
+
+  @Delete("block/:userToBlockId")
+  @HttpCode(204)
+  async block(@Param("userToBlockId") userToBlockId: number, @Request() req) {
+    return await this.friendshipService.block(userToBlockId, req);
   }
 }

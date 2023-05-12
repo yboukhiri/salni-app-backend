@@ -19,7 +19,7 @@ export class FriendRequest extends BaseEntity {
   @Column()
   receiverId: number;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn({ name: "senderId" })
   sender: User;
 
